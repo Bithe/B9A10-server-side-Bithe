@@ -3,7 +3,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 //CONFIG
 const app = express();
@@ -36,7 +36,7 @@ async function run() {
     const craftCollection = client.db("artCraftDB").collection("crafts");
 
     // POST THE ITEMS TO DB FROM ADD CRAFT PAGE
-    app.post("/crafts/", async (req, res) => {
+    app.post("/crafts", async (req, res) => {
       console.log(req.body);
       // data coming from client site is req
       // data going server to client is res
@@ -44,19 +44,69 @@ async function run() {
       const result = await craftCollection.insertOne(req.body);
       console.log(result);
       res.send(result);
+    });
 
-      // GET THE DATA FROM
-      app.get("/crafts", async (req, res) => {
-        console.log(req.params.email);
+    // GET THE DATA FROM
+    app.get("/crafts", async (req, res) => {
+      console.log(req.params.email);
 
-        const cursor = craftCollection.find(); 
-        const result = await cursor.toArray();
-        // const result = await craftCollection.find({ email: req.params.email }).toArray();
-        res.send(result)
-      })
+      const cursor = craftCollection.find();
+      const result = await cursor.toArray();
+      // const result = await craftCollection.find({ email: req.params.email }).toArray();
+      res.send(result);
+    });
 
-  
+    // GET THE DATA AS PER USER
+    app.get("/crafts/:email", async (req, res) => {
+      console.log(req.params.email);
+      const cursor = craftCollection.find({ user_email: req.params.email });
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
+    // TO UPDATE GET SINGLE DATA FROM API
+    app.get("/craft/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log("updated id:", id);
+      const query = { _id: new ObjectId(id) };
+
+      console.log("updated qu:", query);
+      const result = await craftCollection.findOne({ _id: new ObjectId(id) });
+      console.log("update data:", result);
+
+      res.send(result);
+    });
+
+    // UPDATE TO SERVER
+    app.put("/craft/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedCraft = req.body;
+
+      const newUpdatedCraft = {
+        $set: {
+          item_name: updatedCraft.item_name,
+          subcategory_Name: updatedCraft.subcategory_Name,
+          photo: updatedCraft.photo,
+          rating: updatedCraft.rating,
+          processing_time: updatedCraft.processing_time,
+          stockStatus: updatedCraft.stockStatus,
+          price: updatedCraft.price,
+          customization: updatedCraft.customization,
+          short_description: updatedCraft.short_description,
+        }
+      }
+      const result = await craftCollection.updateOne(filter,newUpdatedCraft, options);
+      res.send(result);
+    });
+
+    // DELETE DATA
+    app.delete("/crafts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await craftCollection.deleteOne(query);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
