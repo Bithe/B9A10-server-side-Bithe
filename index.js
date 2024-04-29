@@ -111,7 +111,7 @@ async function run() {
     });
 
 
-        // GET THE SUBCATEGORY DATA FROM
+        // GET THE SUBCATEGORY DATA FROM SUBCATEGORY COLLECTION
         app.get("/subcategory", async (req, res) => {
           console.log(req.params.email);
           const cursor = subCategoryCollection.find();
