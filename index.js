@@ -34,6 +34,7 @@ async function run() {
 
     // DB CREATE
     const craftCollection = client.db("artCraftDB").collection("crafts");
+    const subCategoryCollection = client.db("artCraftDB").collection("subcategory");
 
     // POST THE ITEMS TO DB FROM ADD CRAFT PAGE
     app.post("/crafts", async (req, res) => {
@@ -108,6 +109,15 @@ async function run() {
       const result = await craftCollection.deleteOne(query);
       res.send(result);
     });
+
+
+        // GET THE SUBCATEGORY DATA FROM
+        app.get("/subcategory", async (req, res) => {
+          console.log(req.params.email);
+          const cursor = subCategoryCollection.find();
+          const result = await cursor.toArray();
+          res.send(result);
+        });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
