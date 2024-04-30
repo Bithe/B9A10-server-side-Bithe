@@ -34,7 +34,9 @@ async function run() {
 
     // DB CREATE
     const craftCollection = client.db("artCraftDB").collection("crafts");
-    const subCategoryCollection = client.db("artCraftDB").collection("subcategory");
+    const subCategoryCollection = client
+      .db("artCraftDB")
+      .collection("subcategory");
 
     // POST THE ITEMS TO DB FROM ADD CRAFT PAGE
     app.post("/crafts", async (req, res) => {
@@ -96,9 +98,13 @@ async function run() {
           price: updatedCraft.price,
           customization: updatedCraft.customization,
           short_description: updatedCraft.short_description,
-        }
-      }
-      const result = await craftCollection.updateOne(filter,newUpdatedCraft, options);
+        },
+      };
+      const result = await craftCollection.updateOne(
+        filter,
+        newUpdatedCraft,
+        options
+      );
       res.send(result);
     });
 
@@ -110,14 +116,30 @@ async function run() {
       res.send(result);
     });
 
+    // GET THE SUBCATEGORY DATA FROM SUBCATEGORY COLLECTION
+    app.get("/subcategory", async (req, res) => {
+      console.log(req.params.email);
+      const cursor = subCategoryCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
-        // GET THE SUBCATEGORY DATA FROM SUBCATEGORY COLLECTION
-        app.get("/subcategory", async (req, res) => {
-          console.log(req.params.email);
-          const cursor = subCategoryCollection.find();
-          const result = await cursor.toArray();
-          res.send(result);
-        });
+    // GET SPECIFIC SUBCATEGORY DATA
+    app.get("/subcategory/:subcategoryName", async (req, res) => {
+      try {
+        const { subcategoryName } = req.params;
+
+        // Query the crafts collection for documents with matching subcategory_Name
+        const result = await craftCollection
+          .find({ subcategory_Name: subcategoryName })
+          .toArray();
+
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        res.status(500).json({ error: "Failed to fetch data" });
+      }
+    });
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
