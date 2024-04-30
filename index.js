@@ -128,8 +128,6 @@ async function run() {
     app.get("/subcategory/:subcategoryName", async (req, res) => {
       try {
         const { subcategoryName } = req.params;
-
-        // Query the crafts collection for documents with matching subcategory_Name
         const result = await craftCollection
           .find({ subcategory_Name: subcategoryName })
           .toArray();
